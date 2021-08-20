@@ -16,14 +16,10 @@ import dev.nurlan.service.BookingService;
 import dev.nurlan.util.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
 public class BookingServiceImpl implements BookingService {
-
-    SimpleDateFormat df = new SimpleDateFormat("dd MM yyyy");
 
 
     @Autowired
