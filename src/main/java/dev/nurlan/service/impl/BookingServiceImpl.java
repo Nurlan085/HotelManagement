@@ -16,6 +16,7 @@ import dev.nurlan.service.BookingService;
 import dev.nurlan.util.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 
 @Service
@@ -65,13 +66,13 @@ public class BookingServiceImpl implements BookingService {
                 return response;
             }
 
-            if(!room.getRoomStatus().equals(EnumRoomStatus.EMPTY.getValue())) {
+            if (!room.getRoomStatus().equals(EnumRoomStatus.EMPTY.getValue())) {
                 response.setStatusCode(ExceptionConstants.ROOM_NOT_EMPTY);
                 response.setStatusMessage("Room not empty");
                 return response;
             }
 
-            if(bookingType.equals(EnumBookingType.REGISTRATION.getValue())) {
+            if (bookingType.equals(EnumBookingType.REGISTRATION.getValue())) {
                 room.setRoomStatus(EnumRoomStatus.FULL.getValue());
             } else {
                 room.setRoomStatus(EnumRoomStatus.RESERVED.getValue());
@@ -87,6 +88,42 @@ public class BookingServiceImpl implements BookingService {
             booking.setBookingType(bookingType);
             booking.setFromDate(fromDate);
             booking.setToDate(toDate);
+            bookingDao.save(booking);
+            response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
+            response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatusCode(ExceptionConstants.INTERNAL_EXCEPTION);
+            response.setStatusMessage("Internal exception");
+            return response;
+        }
+        return response;
+    }
+
+    @Override
+    public RespStatus customerExitHotel(Long bookingId) {
+
+        RespStatus response = new RespStatus();
+
+        try {
+
+            if (bookingId == null) {
+                response.setStatusCode(ExceptionConstants.INVALID_REQUEST_DATA);
+                response.setStatusMessage("Invalid request data");
+                return response;
+            }
+
+            Booking booking = bookingDao.findByIdAndActive(bookingId, EnumAvailableStatus.ACTIVE.getValue());
+            if (booking == null) {
+                response.setStatusCode(ExceptionConstants.BOOKING_NOT_FOUND);
+                response.setStatusMessage("Booking not found");
+                return response;
+            }
+
+            Date exitDate = new Date();
+            booking.setExitDate(exitDate);
+            booking.setBookingType(EnumBookingType.EXIT.getValue());
             bookingDao.save(booking);
             response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
             response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());

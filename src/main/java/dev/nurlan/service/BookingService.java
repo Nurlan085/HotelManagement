@@ -6,4 +6,6 @@ import dev.nurlan.response.RespStatus;
 public interface BookingService {
 
     RespStatus createBooking(ReqBooking reqBooking);
+
+    RespStatus customerExitHotel(Long bookingId);
 }

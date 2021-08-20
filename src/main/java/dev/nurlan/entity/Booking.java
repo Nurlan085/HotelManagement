@@ -34,6 +34,7 @@ public class Booking {
     @CreationTimestamp
     private Date bookingDate;
     @ColumnDefault("1")
+    private Date exitDate;
     private Integer active;
 
 

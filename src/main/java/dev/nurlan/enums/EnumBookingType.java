@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum EnumBookingType {
 
-    RESERVATION(0), REGISTRATION(1);
+    RESERVATION(0), REGISTRATION(1), EXIT(2);
 
     private int value;
 

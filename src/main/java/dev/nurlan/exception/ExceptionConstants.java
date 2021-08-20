@@ -19,4 +19,6 @@ public class ExceptionConstants {
 
     public static final Integer ROOM_NOT_EMPTY = 106;
 
+    public static final Integer BOOKING_NOT_FOUND = 107;
+
 }
