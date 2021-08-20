@@ -33,8 +33,8 @@ public class Booking {
     private Date toDate;
     @CreationTimestamp
     private Date bookingDate;
-    @ColumnDefault("1")
     private Date exitDate;
+    @ColumnDefault("1")
     private Integer active;
 
 

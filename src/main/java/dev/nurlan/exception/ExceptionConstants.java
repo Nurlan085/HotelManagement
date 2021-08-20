@@ -21,4 +21,6 @@ public class ExceptionConstants {
 
     public static final Integer BOOKING_NOT_FOUND = 107;
 
+    public static final Integer CUSTOMER_EXITED_HOTEL = 108;
+
 }

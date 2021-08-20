@@ -11,11 +11,21 @@ import dev.nurlan.response.RespRoom;
 import dev.nurlan.response.RespRoomType;
 import dev.nurlan.response.RespStatus;
 import dev.nurlan.service.RoomService;
+import dev.nurlan.util.Utility;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Service
 public class RoomServiceImpl implements RoomService {
+
+    private static final Logger LOGGER = LogManager.getLogger(RoomServiceImpl.class);
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     private RoomDao roomDao;
@@ -29,8 +39,11 @@ public class RoomServiceImpl implements RoomService {
         RespRoom response = new RespRoom();
 
         try {
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called getRoomById, roomId = " + roomId);
+
             if (roomId == null) {
                 response.setStatus(new RespStatus(ExceptionConstants.INVALID_REQUEST_DATA, "Invalid request data"));
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Invalid request data");
                 return response;
             }
 
@@ -38,6 +51,7 @@ public class RoomServiceImpl implements RoomService {
 
             if (room == null) {
                 response.setStatus(new RespStatus(ExceptionConstants.ROOM_NOT_FOUND, "Room not found"));
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room not found");
                 return response;
             }
 
@@ -53,10 +67,13 @@ public class RoomServiceImpl implements RoomService {
             response.setRoomFloor(room.getRoomFloor());
             response.setRoomPrice(room.getRoomPrice());
             response.setStatus(RespStatus.getSuccessMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + "response: " + response);
+
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(new RespStatus(ExceptionConstants.INTERNAL_EXCEPTION, "Internal exception"));
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
             return response;
         }
         return response;
@@ -67,6 +84,8 @@ public class RoomServiceImpl implements RoomService {
         RespStatus response = new RespStatus();
 
         try {
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called createRoom, reqRoom = " + reqRoom);
+
             Long roomTypeId = reqRoom.getRoomTypeId();
             String roomNo = reqRoom.getRoomNo();
             Integer roomFloor = reqRoom.getRoomFloor();
@@ -76,6 +95,7 @@ public class RoomServiceImpl implements RoomService {
                     || roomFloor == null || roomPrice == null) {
                 response.setStatusCode(ExceptionConstants.INVALID_REQUEST_DATA);
                 response.setStatusMessage("Invalid request data");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Invalid request data");
                 return response;
             }
 
@@ -83,6 +103,7 @@ public class RoomServiceImpl implements RoomService {
             if (roomType == null) {
                 response.setStatusCode(ExceptionConstants.ROOM_TYPE_NOT_FOUND);
                 response.setStatusMessage("Room type not found");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room type not found");
                 return response;
             }
 
@@ -94,11 +115,13 @@ public class RoomServiceImpl implements RoomService {
             roomDao.save(room);
             response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
             response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + "response: " + response);
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatusCode(ExceptionConstants.INTERNAL_EXCEPTION);
             response.setStatusMessage("Internal exception");
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
             return response;
         }
         return response;

@@ -14,14 +14,21 @@ import dev.nurlan.request.ReqBooking;
 import dev.nurlan.response.RespStatus;
 import dev.nurlan.service.BookingService;
 import dev.nurlan.util.Utility;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @Service
 public class BookingServiceImpl implements BookingService {
 
+    private static final Logger LOGGER = LogManager.getLogger(BookingServiceImpl.class);
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     private BookingDao bookingDao;
@@ -39,6 +46,7 @@ public class BookingServiceImpl implements BookingService {
         RespStatus response = new RespStatus();
 
         try {
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called createBooking, reqBooking = " + reqBooking);
             Long customerId = reqBooking.getCustomerId();
             Long roomId = reqBooking.getRoomId();
             Integer bookingType = reqBooking.getBookingType();
@@ -49,6 +57,7 @@ public class BookingServiceImpl implements BookingService {
                     fromDate == null || toDate == null) {
                 response.setStatusCode(ExceptionConstants.INVALID_REQUEST_DATA);
                 response.setStatusMessage("Invalid request data");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Invalid request data");
                 return response;
             }
 
@@ -56,6 +65,7 @@ public class BookingServiceImpl implements BookingService {
             if (customer == null) {
                 response.setStatusCode(ExceptionConstants.CUSTOMER_NOT_FOUND);
                 response.setStatusMessage("Customer not found");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Customer not found");
                 return response;
             }
 
@@ -63,12 +73,14 @@ public class BookingServiceImpl implements BookingService {
             if (room == null) {
                 response.setStatusCode(ExceptionConstants.ROOM_NOT_FOUND);
                 response.setStatusMessage("Room not found");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room not found");
                 return response;
             }
 
             if (!room.getRoomStatus().equals(EnumRoomStatus.EMPTY.getValue())) {
                 response.setStatusCode(ExceptionConstants.ROOM_NOT_EMPTY);
                 response.setStatusMessage("Room not empty");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room not empty");
                 return response;
             }
 
@@ -91,11 +103,13 @@ public class BookingServiceImpl implements BookingService {
             bookingDao.save(booking);
             response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
             response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + "response: " + response);
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatusCode(ExceptionConstants.INTERNAL_EXCEPTION);
             response.setStatusMessage("Internal exception");
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
             return response;
         }
         return response;
@@ -107,10 +121,11 @@ public class BookingServiceImpl implements BookingService {
         RespStatus response = new RespStatus();
 
         try {
-
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called customerExitHotel, bookingId = " + bookingId);
             if (bookingId == null) {
                 response.setStatusCode(ExceptionConstants.INVALID_REQUEST_DATA);
                 response.setStatusMessage("Invalid request data");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Invalid request data");
                 return response;
             }
 
@@ -118,20 +133,40 @@ public class BookingServiceImpl implements BookingService {
             if (booking == null) {
                 response.setStatusCode(ExceptionConstants.BOOKING_NOT_FOUND);
                 response.setStatusMessage("Booking not found");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Booking not found");
+                return response;
+            }
+
+            if (booking.getBookingType().equals(EnumBookingType.EXIT.getValue())) {
+                response.setStatusCode(ExceptionConstants.CUSTOMER_EXITED_HOTEL);
+                response.setStatusMessage("Customer exited hotel");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Customer exited hotel");
+                return response;
+            }
+
+            Room room = roomDao.findByIdAndActive(booking.getRoom().getId(), EnumAvailableStatus.ACTIVE.getValue());
+            if (room == null) {
+                response.setStatusCode(ExceptionConstants.ROOM_NOT_FOUND);
+                response.setStatusMessage("Room not found");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room not found");
                 return response;
             }
 
             Date exitDate = new Date();
             booking.setExitDate(exitDate);
             booking.setBookingType(EnumBookingType.EXIT.getValue());
+            room.setRoomStatus(EnumRoomStatus.EMPTY.getValue());
+            booking.setRoom(room);
             bookingDao.save(booking);
             response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
             response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + "response: " + response);
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatusCode(ExceptionConstants.INTERNAL_EXCEPTION);
             response.setStatusMessage("Internal exception");
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
             return response;
         }
         return response;

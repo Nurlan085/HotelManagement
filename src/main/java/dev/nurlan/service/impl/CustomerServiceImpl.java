@@ -8,14 +8,23 @@ import dev.nurlan.response.RespCustomer;
 import dev.nurlan.response.RespCustomerList;
 import dev.nurlan.response.RespStatus;
 import dev.nurlan.service.CustomerService;
+import dev.nurlan.util.Utility;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
+
+    private static final Logger LOGGER = LogManager.getLogger(CustomerServiceImpl.class);
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     private CustomerDao customerDao;
@@ -27,11 +36,13 @@ public class CustomerServiceImpl implements CustomerService {
         RespCustomerList response = new RespCustomerList();
 
         try {
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called getCustomerList");
             List<RespCustomer> respCustomerList = new ArrayList<>();
 
             List<Customer> customerList = customerDao.findAllByActive(EnumAvailableStatus.ACTIVE.getValue());
             if (customerList.isEmpty()) {
                 response.setStatus(new RespStatus(ExceptionConstants.CUSTOMER_NOT_FOUND, "Customer not found"));
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Customer not found");
                 return response;
             }
             for (Customer customer : customerList) {
@@ -40,10 +51,13 @@ public class CustomerServiceImpl implements CustomerService {
             }
             response.setCustomerList(respCustomerList);
             response.setStatus(RespStatus.getSuccessMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + ", success");
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(new RespStatus(ExceptionConstants.INTERNAL_EXCEPTION, "Internal exception"));
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
+
             return response;
         }
 
@@ -56,8 +70,11 @@ public class CustomerServiceImpl implements CustomerService {
         RespCustomer response = new RespCustomer();
 
         try {
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called getCustomerById, customerId = " + customerId);
+
             if (customerId == null) {
                 response.setStatus(new RespStatus(ExceptionConstants.INVALID_REQUEST_DATA, "Invalid request data"));
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Invalid request data");
                 return response;
             }
 
@@ -65,6 +82,7 @@ public class CustomerServiceImpl implements CustomerService {
 
             if (customer == null) {
                 response.setStatus(new RespStatus(ExceptionConstants.CUSTOMER_NOT_FOUND, "Customer not found"));
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Customer not found");
                 return response;
             }
 
@@ -77,10 +95,12 @@ public class CustomerServiceImpl implements CustomerService {
             response.setGender(customer.getGender());
             response.setPassport(customer.getPassport());
             response.setStatus(RespStatus.getSuccessMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + "response: " + response);
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(new RespStatus(ExceptionConstants.INTERNAL_EXCEPTION, "Internal exception"));
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
             return response;
         }
         return response;
