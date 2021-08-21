@@ -9,4 +9,6 @@ public interface RoomService {
     RespRoom getRoomById(Long roomId);
 
     RespStatus createRoom(ReqRoom reqRoom);
+
+    RespStatus deleteRoom(Long roomId);
 }

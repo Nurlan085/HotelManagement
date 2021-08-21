@@ -25,4 +25,9 @@ public class RoomController {
         return roomService.createRoom(reqRoom);
     }
 
+    @PostMapping(value = "/deleteRoom/{roomId}")
+    public RespStatus deleteRoom(@PathVariable("roomId") Long roomId) {
+        return roomService.deleteRoom(roomId);
+    }
+
 }

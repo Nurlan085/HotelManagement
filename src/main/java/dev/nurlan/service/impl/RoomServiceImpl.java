@@ -3,6 +3,7 @@ package dev.nurlan.service.impl;
 import dev.nurlan.entity.Room;
 import dev.nurlan.entity.RoomType;
 import dev.nurlan.enums.EnumAvailableStatus;
+import dev.nurlan.enums.EnumRoomStatus;
 import dev.nurlan.exception.ExceptionConstants;
 import dev.nurlan.repository.RoomDao;
 import dev.nurlan.repository.RoomTypeDao;
@@ -112,6 +113,51 @@ public class RoomServiceImpl implements RoomService {
             room.setRoomType(roomType);
             room.setRoomFloor(roomFloor);
             room.setRoomPrice(roomPrice);
+            roomDao.save(room);
+            response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
+            response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());
+            LOGGER.warn("Ip: " + Utility.getClientIp(request) + "response: " + response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatusCode(ExceptionConstants.INTERNAL_EXCEPTION);
+            response.setStatusMessage("Internal exception");
+            LOGGER.error("Ip: " + Utility.getClientIp(request) + ", error: " + e);
+            return response;
+        }
+        return response;
+    }
+
+    @Override
+    public RespStatus deleteRoom(Long roomId) {
+        RespStatus response = new RespStatus();
+
+        try {
+            LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called deleteRoom, roomId = " + roomId);
+
+            if (roomId == null) {
+                response.setStatusCode(ExceptionConstants.INVALID_REQUEST_DATA);
+                response.setStatusMessage("Invalid request data");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Invalid request data");
+                return response;
+            }
+
+            Room room = roomDao.findByIdAndActive(roomId, EnumAvailableStatus.ACTIVE.getValue());
+            if (room == null) {
+                response.setStatusCode(ExceptionConstants.ROOM_NOT_FOUND);
+                response.setStatusMessage("Room not found");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room not found");
+                return response;
+            }
+
+            if (!room.getRoomStatus().equals(EnumRoomStatus.EMPTY.getValue())) {
+                response.setStatusCode(ExceptionConstants.ROOM_NOT_EMPTY);
+                response.setStatusMessage("Room not empty");
+                LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Room not empty");
+                return response;
+            }
+
+            room.setActive(EnumAvailableStatus.DEACTIVE.getValue());
             roomDao.save(room);
             response.setStatusCode(RespStatus.getSuccessMessage().getStatusCode());
             response.setStatusMessage(RespStatus.getSuccessMessage().getStatusMessage());
