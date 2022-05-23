@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -39,7 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         try {
             LOGGER.info("Ip: " + Utility.getClientIp(request) + ", called getCustomerList");
-            List<RespCustomer> respCustomerList = new ArrayList<>();
+            //List<RespCustomer> respCustomerList = new ArrayList<>();
 
             List<Customer> customerList = customerDao.findAllByActive(EnumAvailableStatus.ACTIVE.getValue());
             if (customerList.isEmpty()) {
@@ -47,10 +47,13 @@ public class CustomerServiceImpl implements CustomerService {
                 LOGGER.info("Ip: " + Utility.getClientIp(request) + ", Customer not found");
                 return response;
             }
-            for (Customer customer : customerList) {
-                RespCustomer respCustomer = getCustomerById(customer.getId());
-                respCustomerList.add(respCustomer);
-            }
+
+            List<RespCustomer> respCustomerList = customerList
+                    .stream()
+                    .map(data ->
+                            getCustomerById(data.getId()))
+                    .collect(Collectors.toList());
+
             response.setCustomerList(respCustomerList);
             response.setStatus(RespStatus.getSuccessMessage());
             LOGGER.warn("Ip: " + Utility.getClientIp(request) + ", success");

@@ -1,12 +1,15 @@
 package dev.nurlan.util;
 
+import lombok.experimental.UtilityClass;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+@UtilityClass
 public class Utility {
 
-    public static String getClientIp(HttpServletRequest request) {
+    public String getClientIp(HttpServletRequest request) {
 
         if (request != null) {
             String remoteAddr = request.getHeader("X-FORWARDED-FOR");
@@ -18,7 +21,7 @@ public class Utility {
         }
     }
 
-    public static long getcommonPriceByDayCount(Date fromDate, Date toDate) {
+    public long getcommonPriceByDayCount(Date fromDate, Date toDate) {
 
         long commonDayCount = TimeUnit.DAYS.convert(toDate.getTime() - fromDate.getTime(), TimeUnit.MILLISECONDS);
 
